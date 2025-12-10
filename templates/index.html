@@ -203,37 +203,59 @@
     </div>
 
     <script>
-        // --- 1. AUDIO ---
-        let mediaRec, chunks = [];
-        async function startRec() {
-            if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
-                alert("MIC ERROR: Browser requires HTTPS."); return;
-            }
-            try {
-                const s = await navigator.mediaDevices.getUserMedia({audio:true});
-                mediaRec = new MediaRecorder(s);
-                mediaRec.start();
-                document.getElementById('rec-status').innerText = "RECORDING...";
-                document.getElementById('mic-btn').classList.add('mic-active');
-                mediaRec.ondataavailable = e => chunks.push(e.data);
-            } catch(e) { alert("Mic Permission Denied."); }
-        }
-        function stopRec() {
-            if(mediaRec){
-                mediaRec.stop();
-                document.getElementById('mic-btn').classList.remove('mic-active');
-                document.getElementById('rec-status').innerText = "AUDIO ENCRYPTED ✅";
-                document.getElementById('rec-status').className = "text-xs text-green-400 mt-4 font-mono font-bold";
-                mediaRec.onstop = () => {
-                    const f = new File([new Blob(chunks)], "v.wav", {type:"audio/wav"});
-                    const dt = new DataTransfer(); dt.items.add(f);
-                    document.getElementById('audio-file').files = dt.files;
-                }
-            }
-        }
+    // --- 1. FIXED AUDIO RECORDER (WEBM) ---
+    let mediaRec, chunks = [];
+    const recStatus = document.getElementById('rec-status');
+    const audioInput = document.getElementById('audio-file');
+    const genBtn = document.getElementById('gen-btn');
 
-        // --- 2. STUDIO ---
-        function setType(t) {
+    async function startRec() {
+        if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+            alert("MIC ERROR: Browser requires HTTPS."); return;
+        }
+        try {
+            // FORCE WEBM for Android/Chrome compatibility
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRec = new MediaRecorder(stream, { mimeType: 'audio/webm' }); 
+            chunks = [];
+            
+            mediaRec.ondataavailable = e => { if(e.data.size > 0) chunks.push(e.data); };
+            
+            mediaRec.onstop = () => {
+                const blob = new Blob(chunks, { type: 'audio/webm' });
+                const file = new File([blob], "voice_note.webm", { type: 'audio/webm' });
+                
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                audioInput.files = dt.files;
+                
+                recStatus.innerText = `AUDIO SAVED (${(blob.size/1024).toFixed(1)} KB)`;
+                recStatus.className = "text-xs text-green-400 mt-4 font-mono font-bold";
+                document.getElementById('mic-btn').classList.remove('mic-active');
+                genBtn.disabled = false;
+            };
+
+            mediaRec.start();
+            recStatus.innerText = "RECORDING...";
+            document.getElementById('mic-btn').classList.add('mic-active');
+            genBtn.disabled = true; // Wait for audio to save
+            
+        } catch(err) {
+            console.error(err);
+            alert("Mic Permission Denied.");
+        }
+    }
+
+    function stopRec() {
+        if(mediaRec && mediaRec.state !== 'inactive') {
+            mediaRec.stop();
+        }
+    }
+
+    // --- (Keep the rest of your Design Studio JS here) ---
+    // ... (setType, Modal Logic, etc.) ...
+    // Paste the rest of the JS from the previous "Final Layout Fix" response here
+    function setType(t) {
             document.getElementById('type-input').value = t;
             ['text','file','audio'].forEach(x => {
                 document.getElementById('section-'+x).classList.add('hidden');
@@ -241,9 +263,11 @@
             });
             document.getElementById('section-'+t).classList.remove('hidden');
             document.getElementById('tab-'+t).classList.add('active');
-        }
-
-        const canvas = document.getElementById('canvas');
+    }
+    // ... (include the rest of the sticker/drag logic) ...
+    // To ensure you have the full file, see the block below for the Sticker Logic:
+    
+    const canvas = document.getElementById('canvas');
         let selectedEl = null; let stickerCount = 0; let bgImageSrc = null;
 
         function openModal() {
