@@ -10,68 +10,21 @@
         @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Syncopate:wght@700&display=swap');
         
         :root { --neon-cyan: #00f3ff; --neon-pink: #bc13fe; --bg-dark: #050510; }
-        
-        body { 
-            font-family: 'Rajdhani', sans-serif; 
-            background-color: var(--bg-dark); 
-            color: white; 
-            overflow-x: hidden; 
-        }
+        body { font-family: 'Rajdhani', sans-serif; background-color: var(--bg-dark); color: white; overflow-x: hidden; }
 
-        /* --- CYBER BACKGROUND --- */
+        /* --- VISUALS --- */
         .cyber-grid {
             position: fixed; inset: 0; z-index: 0;
-            background-image: 
-                linear-gradient(rgba(0, 243, 255, 0.1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(188, 19, 254, 0.1) 1px, transparent 1px);
-            background-size: 50px 50px;
-            perspective: 500px;
-            transform-style: preserve-3d;
-            animation: gridMove 20s linear infinite;
+            background-image: linear-gradient(rgba(0, 243, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(188, 19, 254, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px; perspective: 500px; transform-style: preserve-3d; animation: gridMove 20s linear infinite;
         }
         @keyframes gridMove { 0% { transform: translateY(0) rotateX(20deg); } 100% { transform: translateY(50px) rotateX(20deg); } }
-
-        .watermark {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-15deg);
-            font-family: 'Syncopate', sans-serif; font-size: 10vw; font-weight: 900;
-            color: transparent; -webkit-text-stroke: 2px rgba(255, 255, 255, 0.03);
-            pointer-events: none; z-index: 0; white-space: nowrap;
-        }
-
-        .holo-card {
-            background: rgba(10, 10, 30, 0.6); backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 0 40px rgba(0, 243, 255, 0.1), inset 0 0 20px rgba(0, 0, 0, 0.5);
-            position: relative; z-index: 10;
-        }
-
-        .tab-btn { transition: 0.3s all; text-transform: uppercase; letter-spacing: 2px; }
-        .tab-btn.active {
-            background: linear-gradient(90deg, var(--neon-cyan), #2563eb);
-            color: black; box-shadow: 0 0 20px var(--neon-cyan); border: none; font-weight: 800;
-        }
-
-        /* --- FIXED STUDIO CSS --- */
-        #design-modal { transition: opacity 0.3s ease-in-out; }
-        
-        /* Force a square aspect ratio so QR doesn't stretch */
-        .studio-area {
-            width: 300px; height: 300px; margin: 0 auto 1rem auto;
-            border: 2px dashed var(--neon-cyan); position: relative; overflow: hidden;
-            background-image: url('https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=PREVIEW&color=000');
-            background-size: contain; /* FIX: Ensures QR fits exactly */
-            background-repeat: no-repeat;
-            background-position: center;
-            background-color: white;
-        }
-        
-        .studio-bg { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; object-fit: cover; opacity: 0.5; }
+        .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-15deg); font-family: 'Syncopate', sans-serif; font-size: 10vw; font-weight: 900; color: transparent; -webkit-text-stroke: 2px rgba(255, 255, 255, 0.03); pointer-events: none; z-index: 0; }
+        .holo-card { background: rgba(10, 10, 30, 0.6); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 0 40px rgba(0, 243, 255, 0.1); position: relative; z-index: 10; }
+        .tab-btn.active { background: linear-gradient(90deg, var(--neon-cyan), #2563eb); color: black; box-shadow: 0 0 20px var(--neon-cyan); }
+        .studio-area { width: 300px; height: 300px; margin: 0 auto 1rem; border: 2px dashed var(--neon-cyan); position: relative; overflow: hidden; background: white url('https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=PREVIEW&color=000') center/contain no-repeat; }
         .studio-item { position: absolute; cursor: grab; transform: translate(-50%, -50%); z-index: 20; }
         .studio-item.selected { border: 3px solid var(--neon-pink); box-shadow: 0 0 15px var(--neon-pink); }
-        
-        .emoji-opt { font-size: 32px; cursor: pointer; text-align: center; padding: 5px; transition: 0.2s; }
-        .emoji-opt:hover { scale: 1.2; text-shadow: 0 0 10px white; }
-
         @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 100% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); } }
         .mic-active { animation: pulse-red 1.5s infinite; }
     </style>
@@ -90,9 +43,9 @@
             <input type="hidden" name="background_data" id="background_data">
 
             <div class="flex gap-3 mb-8 bg-black/40 p-2 rounded-xl border border-white/10 backdrop-blur-sm">
-                <button type="button" onclick="setType('text')" id="tab-text" class="tab-btn active flex-1 py-3 rounded-lg"><i class="fas fa-terminal"></i> Text</button>
-                <button type="button" onclick="setType('file')" id="tab-file" class="tab-btn flex-1 py-3 rounded-lg text-cyan-300"><i class="fas fa-file-code"></i> File</button>
-                <button type="button" onclick="setType('audio')" id="tab-audio" class="tab-btn flex-1 py-3 rounded-lg text-pink-300"><i class="fas fa-wave-square"></i> Voice</button>
+                <button type="button" onclick="setType('text')" id="tab-text" class="tab-btn active flex-1 py-3 rounded-lg uppercase font-bold text-sm">Text</button>
+                <button type="button" onclick="setType('file')" id="tab-file" class="tab-btn flex-1 py-3 rounded-lg text-cyan-300 uppercase font-bold text-sm">File</button>
+                <button type="button" onclick="setType('audio')" id="tab-audio" class="tab-btn flex-1 py-3 rounded-lg text-pink-300 uppercase font-bold text-sm">Voice</button>
             </div>
 
             <div id="section-text" class="mb-6">
@@ -109,8 +62,8 @@
 
             <div id="section-audio" class="hidden mb-6 text-center">
                 <div class="relative inline-block">
-                    <button type="button" id="mic-btn" onmousedown="startRec()" onmouseup="stopRec()" class="w-20 h-20 rounded-full bg-gradient-to-br from-red-600 to-pink-700 border-4 border-[#0a0a1a] shadow-xl flex items-center justify-center transition active:scale-95 group">
-                        <i class="fas fa-microphone text-2xl text-white group-hover:text-red-100"></i>
+                    <button type="button" id="mic-btn" onmousedown="startRec()" onmouseup="stopRec()" ontouchstart="startRec()" ontouchend="stopRec()" class="w-20 h-20 rounded-full bg-gradient-to-br from-red-600 to-pink-700 border-4 border-[#0a0a1a] shadow-xl flex items-center justify-center transition active:scale-95 group">
+                        <i class="fas fa-microphone text-2xl text-white"></i>
                     </button>
                 </div>
                 <p id="rec-status" class="text-xs text-gray-400 mt-4 font-mono tracking-widest">HOLD TO RECORD</p>
@@ -118,12 +71,12 @@
             </div>
 
             <div class="grid grid-cols-2 gap-4 mb-6">
-                <input type="password" name="password" placeholder="Passkey [Optional]" class="bg-black/30 border border-white/20 rounded-lg p-3 text-sm text-white focus:border-pink-500 outline-none placeholder-white/20 text-center">
-                <input type="number" name="max_scans" placeholder="Scan Limit [100]" class="bg-black/30 border border-white/20 rounded-lg p-3 text-sm text-white focus:border-pink-500 outline-none placeholder-white/20 text-center">
+                <input type="password" name="password" placeholder="Passkey [Optional]" class="bg-black/30 border border-white/20 rounded-lg p-3 text-sm text-white focus:border-pink-500 outline-none text-center">
+                <input type="number" name="max_scans" placeholder="Scan Limit [100]" class="bg-black/30 border border-white/20 rounded-lg p-3 text-sm text-white focus:border-pink-500 outline-none text-center">
             </div>
 
-            <button type="button" onclick="openModal()" class="w-full py-4 mb-6 border border-cyan-500/50 rounded-xl text-cyan-400 hover:bg-cyan-500/10 transition uppercase text-sm font-bold tracking-[3px] flex items-center justify-center gap-3 group cursor-pointer">
-                <i class="fas fa-palette group-hover:rotate-12 transition"></i> Open Design Studio <span id="design-tick" class="hidden text-green-400"><i class="fas fa-check"></i></span>
+            <button type="button" onclick="openModal()" class="w-full py-4 mb-6 border border-cyan-500/50 rounded-xl text-cyan-400 hover:bg-cyan-500/10 transition uppercase text-sm font-bold tracking-[3px] flex items-center justify-center gap-3">
+                <i class="fas fa-palette"></i> Open Design Studio <span id="design-tick" class="hidden text-green-400"><i class="fas fa-check"></i></span>
             </button>
 
             <button type="submit" id="gen-btn" class="w-full bg-gradient-to-r from-cyan-600 via-blue-600 to-purple-600 py-4 rounded-xl font-black text-xl tracking-[5px] uppercase shadow-[0_0_30px_rgba(0,243,255,0.3)] hover:shadow-[0_0_50px_rgba(188,19,254,0.5)] transform hover:-translate-y-1 transition duration-300 relative overflow-hidden">
@@ -134,14 +87,11 @@
     </div>
 
     <div id="design-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md opacity-0 pointer-events-none transition duration-300">
-        
         <div class="bg-[#0f0f1f] border border-cyan-500/50 rounded-2xl w-full max-w-lg p-6 shadow-2xl overflow-y-auto max-h-[95vh] transform scale-95 transition" id="modal-box">
             
             <div class="flex justify-between items-center mb-4 border-b border-gray-700 pb-2">
-                <h3 class="text-cyan-400 font-bold tracking-widest text-2xl">QR ARCHITECT</h3>
-                <div id="scan-warning" class="hidden px-3 py-1 bg-red-900 text-red-100 text-xs rounded border border-red-500 animate-pulse font-bold">
-                    ⚠️ COVERAGE TOO HIGH
-                </div>
+                <h3 class="text-cyan-400 font-bold tracking-widest text-xl">QR ARCHITECT</h3>
+                <div id="scan-warning" class="hidden px-3 py-1 bg-red-900 text-red-100 text-xs rounded border border-red-500 animate-pulse font-bold">⚠️ HIGH COVERAGE</div>
             </div>
 
             <div class="studio-area bg-white rounded-lg" id="canvas">
@@ -156,58 +106,92 @@
                             <i class="fas fa-trash"></i> Reset BG
                         </button>
                     </div>
-                    
-                    <div class="grid grid-cols-5 gap-3">
-                        <div class="emoji-opt" onclick="addEmoji('😎')">😎</div>
-                        <div class="emoji-opt" onclick="addEmoji('🔥')">🔥</div>
-                        <div class="emoji-opt" onclick="addEmoji('❤️')">❤️</div>
-                        <div class="emoji-opt" onclick="addEmoji('🚀')">🚀</div>
-                        <div class="emoji-opt" onclick="addEmoji('☠️')">☠️</div>
-                        <div class="emoji-opt" onclick="addEmoji('🎃')">🎃</div>
-                        <div class="emoji-opt" onclick="addEmoji('👽')">👽</div>
-                        <div class="emoji-opt" onclick="addEmoji('💩')">💩</div>
-                        <div class="emoji-opt" onclick="addEmoji('💎')">💎</div>
-                        <div class="emoji-opt" onclick="addEmoji('👑')">👑</div>
+                    <div class="grid grid-cols-5 gap-3 text-2xl text-center cursor-pointer">
+                        <div onclick="addEmoji('😎')">😎</div><div onclick="addEmoji('🔥')">🔥</div><div onclick="addEmoji('❤️')">❤️</div><div onclick="addEmoji('🚀')">🚀</div><div onclick="addEmoji('💀')">💀</div>
+                        <div onclick="addEmoji('🎃')">🎃</div><div onclick="addEmoji('👽')">👽</div><div onclick="addEmoji('💩')">💩</div><div onclick="addEmoji('💎')">💎</div><div onclick="addEmoji('👑')">👑</div>
                     </div>
-                    <div class="mt-3 flex justify-between items-center">
-                        <label class="cursor-pointer text-cyan-400 hover:text-white transition flex items-center gap-2 text-sm font-bold">
-                            <i class="fas fa-upload"></i> Upload PNG
-                            <input type="file" class="hidden" onchange="uploadSticker(this)">
-                        </label>
-                        <a href="https://www.flaticon.com/free-stickers" target="_blank" class="text-xs text-gray-500 hover:text-cyan-400 underline">Get More</a>
-                    </div>
+                    <label class="mt-4 block bg-slate-800 border border-slate-600 py-2 text-center rounded cursor-pointer hover:border-cyan-400 text-xs text-cyan-400 font-bold">
+                        Upload Image <input type="file" class="hidden" onchange="uploadSticker(this)">
+                    </label>
                 </div>
 
                 <div id="edit-controls" class="bg-cyan-900/10 border border-cyan-500/20 p-4 rounded-lg opacity-50 pointer-events-none transition">
                     <div class="flex justify-between items-center mb-4">
-                        <span class="text-sm text-cyan-400 font-bold uppercase tracking-wider"><i class="fas fa-sliders-h"></i> Edit Item</span>
+                        <span class="text-sm text-cyan-400 font-bold uppercase">Modifier</span>
                         <div class="flex gap-2">
-                            <button onclick="setAsBackground()" class="text-xs bg-blue-600/50 text-blue-200 px-3 py-1 rounded hover:bg-blue-600 border border-blue-500 font-bold">SET AS BG</button>
-                            <button onclick="deleteSelected()" class="text-xs bg-red-600 text-white px-3 py-1 rounded hover:bg-red-500 font-bold">DELETE</button>
+                            <button onclick="setAsBackground()" class="text-xs bg-blue-600/50 text-blue-200 px-3 py-1 rounded hover:bg-blue-600 border border-blue-500 font-bold">SET BG</button>
+                            <button onclick="deleteSelected()" class="text-xs bg-red-600 text-white px-3 py-1 rounded hover:bg-red-500 font-bold">DEL</button>
                         </div>
                     </div>
-
-                    <div class="flex gap-6">
-                        <div class="flex-1">
-                            <p class="text-xs text-gray-400 mb-2 font-bold uppercase">Size</p>
-                            <input type="range" min="20" max="250" value="50" class="w-full accent-cyan-500 h-2 bg-gray-700 rounded-lg cursor-pointer" id="size-slider" oninput="updateSize(this.value)">
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-xs text-gray-400 mb-2 font-bold uppercase">Transparency</p>
-                            <input type="range" min="0.1" max="1" step="0.1" value="1" class="w-full accent-pink-500 h-2 bg-gray-700 rounded-lg cursor-pointer" id="opacity-slider" oninput="updateOpacity(this.value)">
-                        </div>
+                    <div class="flex gap-4">
+                        <input type="range" min="20" max="250" value="50" class="w-full accent-cyan-500 h-2 bg-gray-700 rounded-lg cursor-pointer" oninput="updateSize(this.value)">
+                        <input type="range" min="0.1" max="1" step="0.1" value="1" class="w-full accent-pink-500 h-2 bg-gray-700 rounded-lg cursor-pointer" oninput="updateOpacity(this.value)">
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4 pt-2">
-                    <button type="button" onclick="closeModal()" class="py-3 rounded-lg border border-gray-600 text-gray-400 hover:bg-white/5 transition font-bold uppercase text-sm">Discard</button>
-                    <button type="button" onclick="saveDesign()" class="py-3 rounded-lg bg-cyan-600 text-white font-bold uppercase text-sm hover:bg-cyan-500 shadow-[0_0_15px_cyan] transition">Save Design</button>
+                <div class="grid grid-cols-2 gap-4">
+                    <button type="button" onclick="closeModal()" class="py-3 rounded-lg border border-gray-600 text-gray-400 hover:bg-white/5 font-bold uppercase text-sm">Cancel</button>
+                    <button type="button" onclick="saveDesign()" class="py-3 rounded-lg bg-cyan-600 text-white font-bold uppercase text-sm hover:bg-cyan-500">Save Design</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        // --- 1. FIXED AUDIO RECORDER ---
+        let mediaRec, chunks = [];
+        const recStatus = document.getElementById('rec-status');
+        const audioInput = document.getElementById('audio-file');
+        const genBtn = document.getElementById('gen-btn');
+
+        async function startRec(e) {
+            if(e) e.preventDefault();
+            // Check HTTPS
+            if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+                alert("MIC ERROR: Browser requires HTTPS."); return;
+            }
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRec = new MediaRecorder(stream, { mimeType: 'audio/webm' }); // Force WebM
+                chunks = []; // Clear old chunks
+                
+                mediaRec.ondataavailable = e => { if(e.data.size > 0) chunks.push(e.data); };
+                
+                mediaRec.onstop = () => {
+                    const blob = new Blob(chunks, { type: 'audio/webm' });
+                    const file = new File([blob], "voice_note.webm", { type: 'audio/webm' });
+                    
+                    // Create transfer list to assign to input
+                    const dt = new DataTransfer();
+                    dt.items.add(file);
+                    audioInput.files = dt.files;
+                    
+                    // Visual Confirm
+                    recStatus.innerText = `AUDIO SAVED (${(blob.size/1024).toFixed(1)} KB)`;
+                    recStatus.className = "text-xs text-green-400 mt-4 font-mono font-bold";
+                    document.getElementById('mic-btn').classList.remove('mic-active');
+                    genBtn.disabled = false; // Re-enable submit
+                };
+
+                mediaRec.start();
+                recStatus.innerText = "RECORDING...";
+                document.getElementById('mic-btn').classList.add('mic-active');
+                genBtn.disabled = true; // Disable submit while recording
+                
+            } catch(err) {
+                console.error(err);
+                alert("Mic Permission Denied or Not Supported.");
+            }
+        }
+
+        function stopRec(e) {
+            if(e) e.preventDefault();
+            if (mediaRec && mediaRec.state !== 'inactive') {
+                mediaRec.stop();
+            }
+        }
+
+        // --- 2. STUDIO LOGIC ---
         function setType(t) {
             document.getElementById('type-input').value = t;
             ['text','file','audio'].forEach(x => {
@@ -218,34 +202,6 @@
             document.getElementById('tab-'+t).classList.add('active');
         }
 
-        let mediaRec, chunks = [];
-        async function startRec() {
-            if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
-                alert("MIC ERROR: Browser requires HTTPS."); return;
-            }
-            try {
-                const s = await navigator.mediaDevices.getUserMedia({audio:true});
-                mediaRec = new MediaRecorder(s);
-                mediaRec.start();
-                document.getElementById('rec-status').innerText = "RECORDING...";
-                document.getElementById('mic-btn').classList.add('mic-active');
-                mediaRec.ondataavailable = e => chunks.push(e.data);
-            } catch(e) { alert("Mic Permission Denied."); }
-        }
-        function stopRec() {
-            if(mediaRec){
-                mediaRec.stop();
-                document.getElementById('mic-btn').classList.remove('mic-active');
-                document.getElementById('rec-status').innerText = "AUDIO ENCRYPTED ✅";
-                document.getElementById('rec-status').className = "text-xs text-green-400 mt-4 font-mono font-bold";
-                mediaRec.onstop = () => {
-                    const f = new File([new Blob(chunks)], "v.wav", {type:"audio/wav"});
-                    const dt = new DataTransfer(); dt.items.add(f);
-                    document.getElementById('audio-file').files = dt.files;
-                }
-            }
-        }
-
         const canvas = document.getElementById('canvas');
         let selectedEl = null; let stickerCount = 0; let bgImageSrc = null;
 
@@ -253,17 +209,15 @@
             const m = document.getElementById('design-modal');
             const b = document.getElementById('modal-box');
             m.classList.remove('pointer-events-none', 'opacity-0');
-            m.classList.add('pointer-events-auto', 'opacity-100');
-            b.classList.remove('scale-95');
-            b.classList.add('scale-100');
+            m.classList.add('opacity-100', 'pointer-events-auto');
+            b.classList.remove('scale-95'); b.classList.add('scale-100');
         }
         function closeModal() {
             const m = document.getElementById('design-modal');
             const b = document.getElementById('modal-box');
-            m.classList.remove('pointer-events-auto', 'opacity-100');
+            m.classList.remove('opacity-100', 'pointer-events-auto');
             m.classList.add('pointer-events-none', 'opacity-0');
-            b.classList.remove('scale-100');
-            b.classList.add('scale-95');
+            b.classList.remove('scale-100'); b.classList.add('scale-95');
         }
 
         function addEmoji(char) {
@@ -271,7 +225,6 @@
             const ctx = c.getContext('2d'); ctx.font = "100px serif"; ctx.fillText(char, 10, 100);
             createStickerElement(c.toDataURL());
         }
-
         function uploadSticker(input) {
             if(input.files[0]) {
                 const r = new FileReader();
@@ -279,35 +232,26 @@
                 r.readAsDataURL(input.files[0]);
             }
         }
-
         function createStickerElement(src) {
             const img = document.createElement('img');
             img.src = src; img.className = 'studio-item w-20'; 
             img.style.left = '50%'; img.style.top = '50%';
             img.dataset.opacity = "1"; img.id = 'stk-'+(stickerCount++);
-            
             img.onmousedown = startDrag; img.ontouchstart = startDrag;
             img.onclick = e => { e.stopPropagation(); selectItem(img); };
-            
             canvas.appendChild(img); selectItem(img); checkCoverage();
         }
-
         function selectItem(el) {
             if(selectedEl) selectedEl.classList.remove('selected');
             selectedEl = el; el.classList.add('selected');
             document.getElementById('edit-controls').classList.remove('opacity-50', 'pointer-events-none');
-            document.getElementById('opacity-slider').value = el.dataset.opacity;
-            document.getElementById('size-slider').value = parseInt(el.style.width);
         }
-
         function deleteSelected() {
             if(selectedEl) { selectedEl.remove(); selectedEl = null; 
             document.getElementById('edit-controls').classList.add('opacity-50', 'pointer-events-none'); checkCoverage(); }
         }
-
         function updateOpacity(v) { if(selectedEl) { selectedEl.style.opacity = v; selectedEl.dataset.opacity = v; } }
         function updateSize(v) { if(selectedEl) { selectedEl.style.width = v+'px'; checkCoverage(); } }
-
         function setAsBackground() {
             if(selectedEl) {
                 bgImageSrc = selectedEl.src;
@@ -321,22 +265,13 @@
             document.getElementById('bg-layer').src = "";
             document.getElementById('bg-layer').classList.add('hidden');
         }
-
         function checkCoverage() {
-            let total = 0;
-            // Use fixed canvas dimensions 300x300 since css is fixed
+            let total = 0; const cw = 300; const ch = 300;
             document.querySelectorAll('.studio-item').forEach(el => total += (parseInt(el.style.width)**2));
-            const warn = document.getElementById('scan-warning');
-            const btn = document.getElementById('gen-btn');
-            
-            // 40% coverage limit
-            if(total > (300*300*0.40)) { 
-                warn.classList.remove('hidden'); btn.disabled = true; btn.classList.add('grayscale');
-            } else {
-                warn.classList.add('hidden'); btn.disabled = false; btn.classList.remove('grayscale');
-            }
+            const warn = document.getElementById('scan-warning'); const btn = document.getElementById('gen-btn');
+            if(total > (cw*ch*0.40)) { warn.classList.remove('hidden'); btn.disabled = true; btn.classList.add('grayscale'); }
+            else { warn.classList.add('hidden'); btn.disabled = false; btn.classList.remove('grayscale'); }
         }
-
         let isDrag=false, startX, startY, initLeft, initTop;
         function startDrag(e) {
             e.preventDefault(); isDrag=true;
@@ -353,17 +288,10 @@
             selectedEl.style.top = (initTop + (cy-startY)) + 'px';
         }
         function stopDrag() { isDrag=false; document.onmousemove=null; document.ontouchmove=null; }
-
         function saveDesign() {
-            const arr = [];
-            // Fixed dimensions 300x300
-            const cw = 300; const ch = 300;
+            const arr = []; const cw = 300; const ch = 300;
             document.querySelectorAll('.studio-item').forEach(el => {
-                arr.push({
-                    src: el.src, x: (el.offsetLeft+el.offsetWidth/2)/cw,
-                    y: (el.offsetTop+el.offsetHeight/2)/ch,
-                    size: parseFloat(el.style.width)/cw, opacity: el.dataset.opacity
-                });
+                arr.push({ src: el.src, x: (el.offsetLeft+el.offsetWidth/2)/cw, y: (el.offsetTop+el.offsetHeight/2)/ch, size: parseFloat(el.style.width)/cw, opacity: el.dataset.opacity });
             });
             document.getElementById('stickers_data').value = JSON.stringify(arr);
             document.getElementById('background_data').value = bgImageSrc ? JSON.stringify({src:bgImageSrc}) : "";

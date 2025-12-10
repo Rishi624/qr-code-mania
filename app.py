@@ -65,7 +65,8 @@ def generate():
     elif data_type == 'audio':
         if 'audio_blob' in request.files:
             file = request.files['audio_blob']
-            filepath = os.path.join(UPLOAD_FOLDER, f"{unique_id}.wav")
+            # We use .webm because browsers record in webm natively
+            filepath = os.path.join(UPLOAD_FOLDER, f"{unique_id}.webm")
             file.save(filepath)
             stored_data = filepath
 
