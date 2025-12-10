@@ -205,52 +205,62 @@
     <script>
     // --- 1. FIXED AUDIO RECORDER (WEBM) ---
     let mediaRec, chunks = [];
-    const recStatus = document.getElementById('rec-status');
-    const audioInput = document.getElementById('audio-file');
-    const genBtn = document.getElementById('gen-btn');
+        const recStatus = document.getElementById('rec-status');
+        const audioInput = document.getElementById('audio-file');
+        const genBtn = document.getElementById('gen-btn');
 
-    async function startRec() {
-        if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
-            alert("MIC ERROR: Browser requires HTTPS."); return;
-        }
-        try {
-            // FORCE WEBM for Android/Chrome compatibility
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRec = new MediaRecorder(stream, { mimeType: 'audio/webm' }); 
-            chunks = [];
+        async function startRec(e) {
+            if(e) e.preventDefault();
             
-            mediaRec.ondataavailable = e => { if(e.data.size > 0) chunks.push(e.data); };
-            
-            mediaRec.onstop = () => {
-                const blob = new Blob(chunks, { type: 'audio/webm' });
-                const file = new File([blob], "voice_note.webm", { type: 'audio/webm' });
+            // HTTPS Check
+            if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+                alert("MIC ERROR: Browser requires HTTPS security."); return;
+            }
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                // We use generic media recorder without specific mimeType to allow browser default
+                mediaRec = new MediaRecorder(stream); 
+                chunks = [];
                 
-                const dt = new DataTransfer();
-                dt.items.add(file);
-                audioInput.files = dt.files;
+                mediaRec.ondataavailable = e => { 
+                    if(e.data.size > 0) chunks.push(e.data); 
+                };
                 
-                recStatus.innerText = `AUDIO SAVED (${(blob.size/1024).toFixed(1)} KB)`;
-                recStatus.className = "text-xs text-green-400 mt-4 font-mono font-bold";
-                document.getElementById('mic-btn').classList.remove('mic-active');
-                genBtn.disabled = false;
-            };
+                mediaRec.onstop = () => {
+                    // Create blob as webm
+                    const blob = new Blob(chunks, { type: 'audio/webm' });
+                    // Create file object
+                    const file = new File([blob], "voice_note.webm", { type: 'audio/webm' });
+                    
+                    // Attach to input
+                    const dt = new DataTransfer();
+                    dt.items.add(file);
+                    audioInput.files = dt.files;
+                    
+                    recStatus.innerText = `AUDIO READY (${(blob.size/1024).toFixed(1)} KB)`;
+                    recStatus.className = "text-xs text-green-400 mt-4 font-mono font-bold";
+                    document.getElementById('mic-btn').classList.remove('mic-active');
+                    genBtn.disabled = false;
+                };
 
-            mediaRec.start();
-            recStatus.innerText = "RECORDING...";
-            document.getElementById('mic-btn').classList.add('mic-active');
-            genBtn.disabled = true; // Wait for audio to save
-            
-        } catch(err) {
-            console.error(err);
-            alert("Mic Permission Denied.");
+                mediaRec.start();
+                recStatus.innerText = "RECORDING...";
+                document.getElementById('mic-btn').classList.add('mic-active');
+                genBtn.disabled = true; // Prevent generating empty file
+                
+            } catch(err) {
+                console.error(err);
+                alert("Mic Access Denied. Check browser settings.");
+            }
         }
-    }
 
-    function stopRec() {
-        if(mediaRec && mediaRec.state !== 'inactive') {
-            mediaRec.stop();
+        function stopRec(e) {
+            if(e) e.preventDefault();
+            if (mediaRec && mediaRec.state !== 'inactive') {
+                mediaRec.stop();
+            }
         }
-    }
 
     // --- (Keep the rest of your Design Studio JS here) ---
     // ... (setType, Modal Logic, etc.) ...

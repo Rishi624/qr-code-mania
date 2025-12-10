@@ -13,7 +13,7 @@ import base64
 import requests
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', 'codemania_final_v6')
+app.secret_key = os.environ.get('SECRET_KEY', 'codemania_robust_v7')
 
 # --- CONFIGURATION ---
 UPLOAD_FOLDER = 'uploads'
@@ -51,21 +51,19 @@ def generate():
     unique_id = str(uuid.uuid4())
     stored_data = ""
 
+    # --- SIMPLIFIED CONTENT HANDLING ---
     if data_type == 'text':
         stored_data = request.form.get('text_content')
-    elif data_type == 'file':
-        if 'file_upload' in request.files:
-            file = request.files['file_upload']
-            if file.filename:
-                ext = os.path.splitext(file.filename)[1]
-                filepath = os.path.join(UPLOAD_FOLDER, f"{unique_id}{ext}")
-                file.save(filepath)
-                stored_data = filepath
-    elif data_type == 'audio':
-        if 'audio_blob' in request.files:
-            file = request.files['audio_blob']
-            # FIX: Save as .webm (Android/Chrome default)
-            filepath = os.path.join(UPLOAD_FOLDER, f"{unique_id}.webm")
+        
+    elif data_type == 'file' or data_type == 'audio': 
+        # Treat Audio EXACTLY like a file
+        file_key = 'file_upload' if data_type == 'file' else 'audio_blob'
+        
+        if file_key in request.files:
+            file = request.files[file_key]
+            # Use .webm for audio (universal web recording format)
+            ext = ".webm" if data_type == 'audio' else os.path.splitext(file.filename)[1]
+            filepath = os.path.join(UPLOAD_FOLDER, f"{unique_id}{ext}")
             file.save(filepath)
             stored_data = filepath
 
@@ -80,31 +78,27 @@ def generate():
     }
     save_entry(unique_id, entry)
 
-    # QR Generation
+    # --- QR GENERATION ---
     qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_H, box_size=10, border=2)
     link = url_for('scan_qr', unique_id=unique_id, _external=True)
     qr.add_data(link)
     qr.make(fit=True)
 
+    # Color Logic
     h = qr_color_hex.lstrip('#')
     front_color = tuple(int(h[i:i+2], 16) for i in (0, 2, 4)) + (255,)
     back_color = (255, 255, 255, 0) if background_data else (255, 255, 255, 255)
 
-    img = qr.make_image(
-        image_factory=StyledPilImage,
-        module_drawer=RoundedModuleDrawer(),
-        color_mask=SolidFillColorMask(front_color=front_color, back_color=back_color)
-    )
-    
+    img = qr.make_image(image_factory=StyledPilImage, module_drawer=RoundedModuleDrawer(), color_mask=SolidFillColorMask(front_color=front_color, back_color=back_color))
     qr_img = img.get_image().convert("RGBA")
     final_img = qr_img
     qr_w, qr_h = qr_img.size
 
-    # Background
+    # Background Application
     if background_data:
         try:
             bg_data = json.loads(background_data)
-            if bg_data and 'src' in bg_data:
+            if 'src' in bg_data:
                 bg_src = bg_data['src']
                 bg_img = None
                 if bg_src.startswith('data:image'):
@@ -120,9 +114,9 @@ def generate():
                     canvas.paste(bg_img, (0,0))
                     canvas.paste(qr_img, (0,0), qr_img)
                     final_img = canvas
-        except Exception as e: print(f"BG Error: {e}")
+        except: pass
 
-    # Stickers
+    # Sticker Application
     if stickers_json:
         try:
             stickers = json.loads(stickers_json)
@@ -139,11 +133,13 @@ def generate():
                     if s_img:
                         target_size = int(qr_w * float(s['size']))
                         s_img = s_img.resize((target_size, target_size), Image.Resampling.LANCZOS)
+                        
                         opacity = float(s.get('opacity', 1.0))
                         if opacity < 1.0:
                             alpha = s_img.split()[3]
                             alpha = ImageEnhance.Brightness(alpha).enhance(opacity)
                             s_img.putalpha(alpha)
+
                         x = int(float(s['x']) * qr_w) - (target_size // 2)
                         y = int(float(s['y']) * qr_h) - (target_size // 2)
                         final_img.paste(s_img, (x, y), s_img)
@@ -174,29 +170,36 @@ def scan_qr(unique_id):
     return serve_content(unique_id, entry)
 
 def serve_content(unique_id, entry):
-    if entry['type'] != 'file':
+    # Only files/audio trigger the file download logic
+    if entry['type'] == 'text':
         entry['current_scans'] += 1
         save_entry(unique_id, entry)
-
-    context = {'content': entry['data'], 'unique_id': unique_id}
-    if entry['type'] == 'text': return render_template('view_text.html', **context)
-    elif entry['type'] == 'audio': return render_template('view_audio.html', **context)
-    elif entry['type'] == 'file': return download_file(unique_id)
+        return render_template('view_text.html', content=entry['data'], unique_id=unique_id)
+    
+    # Files and Audio now use the same logic: DOWNLOAD
+    elif entry['type'] in ['file', 'audio']:
+        return render_template('view_text.html', 
+                               content="Secure Content Ready.", 
+                               is_file=True, 
+                               file_url=url_for('download_file', unique_id=unique_id),
+                               unique_id=unique_id)
 
 @app.route('/download/<unique_id>')
 def download_file(unique_id):
     entry = load_entry(unique_id)
-    if entry and entry['type'] == 'file':
+    if entry:
         entry['current_scans'] += 1
         save_entry(unique_id, entry)
-        return send_file(entry['data'], as_attachment=True, download_name=os.path.basename(entry['data']))
+        
+        # Smart Naming
+        filename = "secure_file"
+        if entry['type'] == 'audio':
+            filename = "voice_note.webm"
+        elif entry['type'] == 'file':
+            filename = os.path.basename(entry['data'])
+            
+        return send_file(entry['data'], as_attachment=True, download_name=filename)
     return "Error"
-
-@app.route('/audio_file/<unique_id>')
-def serve_audio(unique_id):
-    entry = load_entry(unique_id)
-    if entry: return send_file(entry['data'], mimetype="audio/webm")
-    return "Error", 404
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000)) 
