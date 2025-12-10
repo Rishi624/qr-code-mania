@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Voice Message</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="bg-slate-900 text-white min-h-screen flex items-center justify-center font-mono p-4">
+    <div class="bg-slate-800 p-8 rounded-2xl shadow-2xl w-full max-w-sm text-center border border-cyan-500">
+        <i class="fas fa-volume-up text-4xl text-cyan-400 mb-4 animate-pulse"></i>
+        <h2 class="text-xl font-bold mb-4">INCOMING VOICE NOTE</h2>
+        
+        <audio controls class="w-full mb-4">
+            <source src="/audio_file/{{ unique_id }}" type="audio/wav">
+            Your browser does not support audio.
+        </audio>
+        
+        <p class="text-xs text-gray-500">Listen carefully. This message may self-destruct.</p>
+    </div>
+
+    </body>
+</html>

@@ -1,14 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>QR Generated</title>
+    <title>CODE MANIA | Encrypted</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap');
+        body { font-family: 'Rajdhani', sans-serif; background-color: #050510; color: white; }
+        .holo-card {
+            background: rgba(10, 10, 30, 0.6); backdrop-filter: blur(15px);
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            box-shadow: 0 0 50px rgba(0, 243, 255, 0.1);
+        }
+    </style>
 </head>
-<body class="bg-slate-900 text-white h-screen flex flex-col items-center justify-center font-mono">
-    <div class="bg-white p-4 rounded-xl shadow-[0_0_30px_#06b6d4]">
-        <img src="data:image/png;base64,{{ qr_image }}" alt="QR Code" class="w-64 h-64">
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+    
+    <div class="fixed inset-0 z-0 opacity-20" style="background-image: linear-gradient(#00f3ff 1px, transparent 1px), linear-gradient(90deg, #00f3ff 1px, transparent 1px); background-size: 50px 50px; transform: perspective(500px) rotateX(20deg);"></div>
+
+    <div class="holo-card p-6 rounded-3xl relative z-10 w-full max-w-sm flex flex-col items-center">
+        
+        <div class="mb-4 flex items-center gap-2 text-cyan-400">
+            <i class="fas fa-lock"></i> <span class="tracking-[4px] font-bold text-sm">ENCRYPTED</span>
+        </div>
+
+        <div class="relative bg-white p-2 rounded-xl mb-6 overflow-hidden">
+            <img src="data:image/png;base64,{{ qr_image }}" class="w-full h-auto max-h-[300px] object-contain rounded-lg shadow-inner">
+        </div>
+
+        <div class="w-full bg-black/40 border border-white/10 p-3 rounded-lg mb-6 flex justify-between items-center group">
+            <p class="text-xs text-cyan-200 font-mono truncate mr-2 opacity-70 group-hover:opacity-100 transition">{{ link }}</p>
+            <button onclick="copyLink()" class="text-cyan-400 hover:text-white transition"><i class="fas fa-copy"></i></button>
+        </div>
+
+        <div class="flex w-full gap-3">
+            <button onclick="shareLink()" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 font-bold tracking-widest uppercase text-xs hover:scale-105 transition shadow-lg shadow-cyan-500/20">
+                <i class="fas fa-share-alt mr-1"></i> Share
+            </button>
+            <a href="data:image/png;base64,{{ qr_image }}" download="CodeMania_Secure.png" class="flex-1 py-3 rounded-xl border border-cyan-500/50 text-cyan-400 font-bold tracking-widest uppercase text-xs hover:bg-cyan-900/20 transition text-center flex items-center justify-center gap-2">
+                <i class="fas fa-download"></i> Save
+            </a>
+        </div>
     </div>
-    <p class="mt-6 text-cyan-400">Scan within 10 minutes</p>
-    <a href="/" class="mt-4 text-gray-500 hover:text-white underline">Create Another</a>
+
+    <a href="/" class="mt-8 text-cyan-500/50 hover:text-cyan-400 tracking-[5px] uppercase text-xs z-10 transition">
+        <i class="fas fa-undo"></i> Reset System
+    </a>
+
+    <script>
+        const link = "{{ link }}";
+        async function shareLink() {
+            if (navigator.share) {
+                try { await navigator.share({ title: 'Code Mania', text: 'Secure Drop:', url: link }); } catch (e) {}
+            } else { copyLink(); }
+        }
+        function copyLink() {
+            navigator.clipboard.writeText(link);
+            alert("Link copied to clipboard protocol.");
+        }
+    </script>
 </body>
 </html>

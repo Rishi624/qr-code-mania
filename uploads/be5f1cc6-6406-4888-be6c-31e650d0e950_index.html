@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rishyendra Yelamarthy - Security Portfolio</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* --- 1. Global Settings & Variables --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-color: #f4f4f5;       /* Very light grey (Clean tech look) */
+            --text-main: #18181b;      /* Almost Black */
+            --text-muted: #52525b;     /* Dark Grey */
+            --accent-color: #0d9488;   /* Teal/Cyber Green */
+            
+            --font-main: 'Outfit', sans-serif;
+            --font-code: 'Space Mono', monospace;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            /* Creating a subtle Tech Grid Background */
+            background-image: radial-gradient(#d4d4d8 1px, transparent 1px);
+            background-size: 24px 24px; /* Size of the grid squares */
+            
+            color: var(--text-main);
+            font-family: var(--font-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            max-width: 1000px;
+            width: 100%;
+            gap: 5rem; 
+        }
+
+        /* --- 2. Animations --- */
+        /* Keyframes for sliding up */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* --- 3. Left Column (Profile) --- */
+        .left-column {
+            flex: 1;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            /* Animation: Delays make elements load one by one */
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+        .profile-img-container {
+            width: 260px;
+            height: 300px;
+            margin-bottom: 25px;
+            overflow: hidden;
+            border-radius: 12px; /* Changed from Arch to Rounded Rect (More modern/app-like) */
+            box-shadow: 15px 15px 0px rgba(0,0,0,0.1); /* "Hard" shadow for a graphic look */
+            transition: transform 0.3s ease;
+        }
+        
+        .profile-img-container:hover {
+            transform: translate(-5px, -5px);
+            box-shadow: 20px 20px 0px var(--accent-color); /* Shadow glows teal on hover */
+        }
+
+        .profile-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        h1 {
+            font-family: var(--font-main);
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 8px;
+            color: var(--text-main);
+            letter-spacing: -1px; /* Tighter letters look more modern */
+        }
+
+        h2.subtitle {
+            font-family: var(--font-code); /* Coding font */
+            font-size: 0.95rem;
+            font-weight: 400;
+            color: var(--accent-color);
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Email Styling */
+        .email-link {
+            font-family: var(--font-code);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-top: 15px;
+            border-bottom: 1px solid transparent;
+            transition: all 0.3s;
+        }
+        .email-link:hover {
+            color: var(--accent-color);
+            border-bottom: 1px solid var(--accent-color);
+        }
+
+        /* Social Icons */
+        .social-icons {
+            margin-top: 20px;
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .social-icons a {
+            color: var(--text-main);
+            font-size: 1.5rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .social-icons a:hover {
+            color: var(--accent-color);
+            transform: translateY(-3px);
+        }
+
+        /* --- 4. Right Column (Content) --- */
+        .right-column {
+            flex: 1.2;
+            text-align: left;
+            /* Animation delay: Loads slightly after the left column */
+            opacity: 0; /* Start hidden */
+            animation: fadeInUp 0.8s ease-out 0.2s forwards;
+        }
+
+        h3.section-title {
+            font-family: var(--font-main);
+            font-size: 1rem; 
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* Decorative line next to "About Me" */
+        h3.section-title::after {
+            content: "";
+            display: block;
+            height: 2px;
+            width: 50px;
+            background-color: var(--accent-color);
+        }
+
+        p.description {
+            font-family: var(--font-main);
+            font-size: 1.25rem; /* Larger, readable text */
+            font-weight: 300;
+            line-height: 1.6;
+            color: var(--text-main);
+            margin-bottom: 40px;
+            max-width: 550px;
+        }
+
+        /* Highlight specific words in the description */
+        .highlight {
+            font-weight: 500;
+            color: var(--accent-color);
+        }
+
+        /* --- 5. Tech Buttons --- */
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background-color: transparent;
+            border: 2px solid var(--text-main);
+            border-radius: 4px; /* Sharp corners for tech look */
+            padding: 12px 24px;
+            min-width: 120px;
+            
+            font-family: var(--font-code); /* Coding font */
+            font-weight: 700;
+            font-size: 0.8rem;
+            color: var(--text-main);
+            
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        /* Button Hover Effect: Slide in color */
+        .btn::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background-color: var(--text-main);
+            z-index: -1;
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .btn:hover::before {
+            transform: scaleX(1);
+        }
+
+        .btn:hover {
+            color: #fff;
+            border-color: var(--text-main);
+        }
+
+        /* --- Mobile Responsiveness --- */
+        @media (max-width: 850px) {
+            .container {
+                flex-direction: column;
+                gap: 3rem;
+                padding-top: 2rem;
+            }
+            .right-column {
+                text-align: center;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+            h3.section-title { justify-content: center; }
+            p.description { text-align: center; font-size: 1.1rem; }
+            .btn-group { justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <section class="container">
+        <div class="left-column">
+            <div class="profile-img-container">
+                <img src="profile.jpeg" alt="Rishyendra">
+            </div>
+            
+            <h1>Rishyendra Yelamarthy</h1>
+            <h2 class="subtitle">&lt;Cyber Security Student /&gt;</h2>
+            
+            <div class="social-icons">
+                <a href="https://www.linkedin.com/in/rishi-yelamarthy-111194345" target="_blank" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                <a href="https://github.com/Rishi624" target="_blank" title="GitHub"><i class="fab fa-github"></i></a>
+                <a href="https://tryhackme.com/p/User580" target="_blank" title="TryHackMe"><i class="fas fa-terminal"></i></a>
+                <a href="https://www.instagram.com/rishiyelamarthy" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
+            </div>
+
+            <a href="mailto:ryelamar@student.gitam.edu" class="email-link">ryelamar@student.gitam.edu</a>
+        </div> 
+
+        <div class="right-column">
+            <h3 class="section-title">01 // About Me</h3>
+            
+            <p class="description">
+                I am a second-year student at GITAM. I have a strong interest in <span class="highlight">Cyber Security</span> and actively develop my skills by solving <span class="highlight">TryHackMe</span> rooms and participating in <span class="highlight">Capture The Flag (CTF)</span> competitions. Additionally, I am an active member of the university's <span class="highlight">AWS Cloud</span> Club.
+            </p>
+
+            <div class="btn-group">
+                <a href="writeups.html" class="btn">Writeups</a>
+                <a href="projects.html" class="btn">Projects</a>
+                <a href="achievements.html" class="btn">Achievements</a>
+            </div>
+        </div>
+    </section>
+
+</body>
+</html>

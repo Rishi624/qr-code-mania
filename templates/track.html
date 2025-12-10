@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Mission Control</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-white min-h-screen p-6 font-mono">
+    <div class="max-w-2xl mx-auto">
+        <h1 class="text-2xl font-bold text-red-500 mb-6 border-b border-gray-700 pb-2">MISSION DASHBOARD</h1>
+        
+        <div class="grid grid-cols-2 gap-4 mb-8">
+            <div class="bg-slate-900 p-4 rounded border border-gray-700">
+                <p class="text-gray-500 text-xs uppercase">Scans</p>
+                <p class="text-3xl font-bold text-cyan-400">{{ entry.current_scans }} / {{ entry.max_scans }}</p>
+            </div>
+            <div class="bg-slate-900 p-4 rounded border border-gray-700">
+                <p class="text-gray-500 text-xs uppercase">Status</p>
+                <p class="text-xl font-bold text-green-400">ACTIVE</p>
+            </div>
+        </div>
+
+        <h3 class="text-xl font-bold text-gray-300 mb-4">REACTIONS CAPTURED</h3>
+        
+        {% if entry.reactions %}
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {% for img in entry.reactions %}
+                <div class="bg-white p-1 rounded">
+                    <img src="/reaction_img/{{ img }}" class="w-full rounded">
+                    <p class="text-black text-xs text-center pt-1">Target #{{ loop.index }}</p>
+                </div>
+            {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-gray-600 italic">No reactions captured yet.</p>
+        {% endif %}
+        
+        <a href="/" class="block mt-12 text-center text-gray-500 underline">Exit Dashboard</a>
+    </div>
+</body>
+</html>
