@@ -6,7 +6,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background-color: #050510; color: white; font-family: 'Courier New', monospace; }
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap');
+        body { background-color: #050510; color: white; font-family: 'Rajdhani', sans-serif; }
         .holo-card {
             background: rgba(10, 10, 30, 0.8); border: 1px solid rgba(0, 243, 255, 0.3);
             box-shadow: 0 0 50px rgba(0, 243, 255, 0.1);
@@ -17,22 +18,24 @@
     
     <div class="holo-card w-full max-w-md p-8 rounded-2xl border border-cyan-500/50 shadow-2xl text-center">
         
-        <i class="fas fa-lock text-4xl text-cyan-400 mb-6"></i>
-        <h2 class="text-xl text-cyan-400 mb-4 border-b border-gray-700 pb-4 tracking-widest font-bold">DECRYPTED DATA</h2>
+        <i class="fas fa-lock text-5xl text-cyan-400 mb-6 animate-pulse"></i>
+        <h2 class="text-2xl text-cyan-100 mb-4 border-b border-gray-700 pb-4 tracking-[4px] font-bold">DECRYPTED</h2>
         
-        <div class="bg-black/40 p-4 rounded text-green-400 text-sm whitespace-pre-wrap break-words border border-green-900/50 mb-6">
+        <div class="bg-black/40 p-4 rounded-xl text-cyan-400 text-sm whitespace-pre-wrap break-words border border-white/10 mb-6 font-mono shadow-inner">
             {{ content }}
         </div>
 
         {% if is_file %}
-        <a href="{{ file_url }}" class="block w-full bg-gradient-to-r from-cyan-600 to-blue-600 py-3 rounded-lg text-white font-bold hover:shadow-[0_0_15px_cyan] transition uppercase tracking-widest text-sm">
+        <a href="{{ file_url }}" class="block w-full bg-gradient-to-r from-cyan-600 to-blue-600 py-4 rounded-xl text-white font-bold hover:shadow-[0_0_20px_cyan] transition uppercase tracking-widest text-sm transform hover:-translate-y-1">
             <i class="fas fa-download mr-2"></i> Download Content
         </a>
-        <p class="text-[10px] text-gray-500 mt-3 uppercase">One-time link generated.</p>
+        <p class="text-[10px] text-gray-500 mt-4 uppercase tracking-widest">Self-Destruct Sequence Active</p>
         {% endif %}
 
-        <div class="mt-8 border-t border-gray-800 pt-4">
-            <a href="/" class="text-xs text-gray-500 hover:text-white underline">Create Your Own</a>
+        <div class="mt-8 pt-4 border-t border-white/5">
+            <a href="/" class="text-xs text-gray-500 hover:text-white transition uppercase tracking-widest">
+                <i class="fas fa-plus"></i> Generate New Code
+            </a>
         </div>
     </div>
 

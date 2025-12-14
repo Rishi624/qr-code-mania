@@ -18,7 +18,6 @@
             overflow-x: hidden; 
         }
 
-        /* --- BACKGROUND FX --- */
         .cyber-grid {
             position: fixed; inset: 0; z-index: 0;
             background-image: 
@@ -38,7 +37,6 @@
             pointer-events: none; z-index: 0; white-space: nowrap;
         }
 
-        /* --- MAIN CARD --- */
         .holo-card {
             background: rgba(10, 10, 30, 0.6); backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -52,28 +50,18 @@
             color: black; box-shadow: 0 0 20px var(--neon-cyan); border: none; font-weight: 800;
         }
 
-        /* --- STUDIO MODAL FIXED --- */
         #design-modal { transition: opacity 0.3s ease-in-out; }
         
         .studio-area {
-            /* FIXED DIMENSIONS TO MATCH QR ASPECT RATIO (SQUARE) */
-            width: 300px; 
-            height: 300px; 
-            margin: 0 auto 1rem auto;
-            border: 2px dashed var(--neon-cyan); 
-            position: relative; 
-            overflow: hidden;
+            width: 300px; height: 300px; margin: 0 auto 1rem auto;
+            border: 2px dashed var(--neon-cyan); position: relative; overflow: hidden;
             background-image: url('https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=PREVIEW&color=000');
-            background-size: contain; /* Ensures the QR fits perfectly inside the box */
-            background-repeat: no-repeat;
-            background-position: center;
-            background-color: white;
+            background-size: contain; background-repeat: no-repeat; background-position: center; background-color: white;
         }
         
         .studio-bg { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; object-fit: cover; opacity: 0.5; }
         .studio-item { position: absolute; cursor: grab; transform: translate(-50%, -50%); z-index: 20; }
         .studio-item.selected { border: 3px solid var(--neon-pink); box-shadow: 0 0 15px var(--neon-pink); }
-        
         .emoji-opt { font-size: 32px; cursor: pointer; text-align: center; padding: 5px; transition: 0.2s; }
         .emoji-opt:hover { scale: 1.2; text-shadow: 0 0 10px white; }
 
@@ -87,10 +75,7 @@
     <div class="watermark">CODE MANIA</div>
 
     <div class="holo-card w-full max-w-lg rounded-3xl p-8 transition duration-500">
-        
-        <h1 class="text-4xl text-center font-bold mb-8 tracking-tighter text-transparent bg-clip-text bg-white" style="font-family: 'Syncopate', sans-serif;">
-            CODE MANIA
-        </h1>
+        <h1 class="text-4xl text-center font-bold mb-8 tracking-tighter text-transparent bg-clip-text bg-white" style="font-family: 'Syncopate', sans-serif;">CODE MANIA</h1>
 
         <form action="/generate" method="POST" enctype="multipart/form-data" id="mainForm">
             <input type="hidden" name="type" id="type-input" value="text">
@@ -117,17 +102,17 @@
 
             <div id="section-audio" class="hidden mb-6 text-center">
                 <div class="relative inline-block">
-                    <button type="button" id="mic-btn" onmousedown="startRec()" onmouseup="stopRec()" class="w-20 h-20 rounded-full bg-gradient-to-br from-red-600 to-pink-700 border-4 border-[#0a0a1a] shadow-xl flex items-center justify-center transition active:scale-95 group">
-                        <i class="fas fa-microphone text-2xl text-white group-hover:text-red-100"></i>
+                    <button type="button" id="mic-btn" onclick="toggleRec()" class="w-20 h-20 rounded-full bg-gradient-to-br from-red-600 to-pink-700 border-4 border-[#0a0a1a] shadow-xl flex items-center justify-center transition active:scale-95 group">
+                        <i id="mic-icon" class="fas fa-microphone text-2xl text-white group-hover:text-red-100"></i>
                     </button>
                 </div>
-                <p id="rec-status" class="text-xs text-gray-400 mt-4 font-mono tracking-widest">HOLD TO RECORD</p>
+                <p id="rec-status" class="text-xs text-gray-400 mt-4 font-mono tracking-widest">TAP TO START RECORDING</p>
                 <input type="file" name="audio_blob" id="audio-file" class="hidden">
             </div>
 
             <div class="grid grid-cols-2 gap-4 mb-6">
-                <input type="password" name="password" placeholder="Passkey" class="bg-black/30 border border-white/20 rounded-lg p-3 text-sm text-white focus:border-pink-500 outline-none text-center">
-                <input type="number" name="max_scans" placeholder="Limit" class="bg-black/30 border border-white/20 rounded-lg p-3 text-sm text-white focus:border-pink-500 outline-none text-center">
+                <input type="password" name="password" placeholder="Passkey [Optional]" class="bg-black/30 border border-white/20 rounded-lg p-3 text-sm text-white focus:border-pink-500 outline-none text-center">
+                <input type="number" name="max_scans" placeholder="Scan Limit [100]" class="bg-black/30 border border-white/20 rounded-lg p-3 text-sm text-white focus:border-pink-500 outline-none text-center">
             </div>
 
             <button type="button" onclick="openModal()" class="w-full py-4 mb-6 border border-cyan-500/50 rounded-xl text-cyan-400 hover:bg-cyan-500/10 transition uppercase text-sm font-bold tracking-[3px] flex items-center justify-center gap-3 group cursor-pointer">
@@ -142,14 +127,11 @@
     </div>
 
     <div id="design-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md opacity-0 pointer-events-none transition duration-300">
-        
         <div class="bg-[#0f0f1f] border border-cyan-500/50 rounded-2xl w-full max-w-lg p-6 shadow-2xl overflow-y-auto max-h-[95vh] transform scale-95 transition" id="modal-box">
             
             <div class="flex justify-between items-center mb-4 border-b border-gray-700 pb-2">
                 <h3 class="text-cyan-400 font-bold tracking-widest text-xl">QR ARCHITECT</h3>
-                <div id="scan-warning" class="hidden px-3 py-1 bg-red-900 text-red-100 text-xs rounded border border-red-500 animate-pulse font-bold">
-                    ⚠️ COVERAGE HIGH
-                </div>
+                <div id="scan-warning" class="hidden px-3 py-1 bg-red-900 text-red-100 text-xs rounded border border-red-500 animate-pulse font-bold">⚠️ HIGH COVERAGE</div>
             </div>
 
             <div class="studio-area bg-white rounded-lg" id="canvas">
@@ -160,37 +142,28 @@
                 <div class="bg-black/40 p-4 rounded-lg border border-white/5">
                     <div class="flex justify-between mb-2">
                         <p class="text-sm text-gray-300 uppercase font-bold tracking-wider">Add Elements</p>
-                        <button onclick="clearBackground()" class="text-xs text-red-400 border border-red-500/50 px-3 py-1 rounded hover:bg-red-900/50 flex items-center gap-1">
-                            <i class="fas fa-trash"></i> Reset BG
-                        </button>
+                        <button onclick="clearBackground()" class="text-xs text-red-400 border border-red-500/50 px-3 py-1 rounded hover:bg-red-900/50 flex items-center gap-1"><i class="fas fa-trash"></i> Reset BG</button>
                     </div>
                     <div class="grid grid-cols-5 gap-3 text-2xl text-center cursor-pointer">
                         <div onclick="addEmoji('😎')">😎</div><div onclick="addEmoji('🔥')">🔥</div><div onclick="addEmoji('❤️')">❤️</div><div onclick="addEmoji('🚀')">🚀</div><div onclick="addEmoji('💀')">💀</div>
                         <div onclick="addEmoji('🎃')">🎃</div><div onclick="addEmoji('👽')">👽</div><div onclick="addEmoji('💩')">💩</div><div onclick="addEmoji('💎')">💎</div><div onclick="addEmoji('👑')">👑</div>
                     </div>
                     <label class="mt-4 block bg-slate-800 border border-slate-600 py-2 text-center rounded cursor-pointer hover:border-cyan-400 text-xs text-cyan-400 font-bold">
-                        <i class="fas fa-upload mr-1"></i> Upload Image 
-                        <input type="file" class="hidden" onchange="uploadSticker(this)">
+                        <i class="fas fa-upload mr-1"></i> Upload Image <input type="file" class="hidden" onchange="uploadSticker(this)">
                     </label>
                 </div>
 
                 <div id="edit-controls" class="bg-cyan-900/10 border border-cyan-500/20 p-4 rounded-lg opacity-50 pointer-events-none transition">
                     <div class="flex justify-between items-center mb-4">
-                        <span class="text-sm text-cyan-400 font-bold uppercase tracking-wider">Item Settings</span>
+                        <span class="text-sm text-cyan-400 font-bold uppercase tracking-wider">Settings</span>
                         <div class="flex gap-2">
                             <button onclick="setAsBackground()" class="text-xs bg-blue-600/50 text-blue-200 px-3 py-1 rounded hover:bg-blue-600 border border-blue-500 font-bold">SET BG</button>
                             <button onclick="deleteSelected()" class="text-xs bg-red-600 text-white px-3 py-1 rounded hover:bg-red-500 font-bold">DEL</button>
                         </div>
                     </div>
                     <div class="flex gap-4">
-                        <div class="flex-1">
-                            <p class="text-[10px] text-gray-400 uppercase mb-1">Size</p>
-                            <input type="range" min="20" max="250" value="50" class="w-full accent-cyan-500 h-2 bg-gray-700 rounded-lg cursor-pointer" oninput="updateSize(this.value)">
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-[10px] text-gray-400 uppercase mb-1">Opacity</p>
-                            <input type="range" min="0.1" max="1" step="0.1" value="1" class="w-full accent-pink-500 h-2 bg-gray-700 rounded-lg cursor-pointer" oninput="updateOpacity(this.value)">
-                        </div>
+                        <div class="flex-1"><p class="text-[10px] text-gray-400 uppercase mb-1">Size</p><input type="range" min="20" max="250" value="50" class="w-full accent-cyan-500 h-2 bg-gray-700 rounded-lg cursor-pointer" oninput="updateSize(this.value)"></div>
+                        <div class="flex-1"><p class="text-[10px] text-gray-400 uppercase mb-1">Opacity</p><input type="range" min="0.1" max="1" step="0.1" value="1" class="w-full accent-pink-500 h-2 bg-gray-700 rounded-lg cursor-pointer" oninput="updateOpacity(this.value)"></div>
                     </div>
                 </div>
 
@@ -203,69 +176,7 @@
     </div>
 
     <script>
-    // --- 1. FIXED AUDIO RECORDER (WEBM) ---
-    let mediaRec, chunks = [];
-        const recStatus = document.getElementById('rec-status');
-        const audioInput = document.getElementById('audio-file');
-        const genBtn = document.getElementById('gen-btn');
-
-        async function startRec(e) {
-            if(e) e.preventDefault();
-            
-            // HTTPS Check
-            if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
-                alert("MIC ERROR: Browser requires HTTPS security."); return;
-            }
-
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                // We use generic media recorder without specific mimeType to allow browser default
-                mediaRec = new MediaRecorder(stream); 
-                chunks = [];
-                
-                mediaRec.ondataavailable = e => { 
-                    if(e.data.size > 0) chunks.push(e.data); 
-                };
-                
-                mediaRec.onstop = () => {
-                    // Create blob as webm
-                    const blob = new Blob(chunks, { type: 'audio/webm' });
-                    // Create file object
-                    const file = new File([blob], "voice_note.webm", { type: 'audio/webm' });
-                    
-                    // Attach to input
-                    const dt = new DataTransfer();
-                    dt.items.add(file);
-                    audioInput.files = dt.files;
-                    
-                    recStatus.innerText = `AUDIO READY (${(blob.size/1024).toFixed(1)} KB)`;
-                    recStatus.className = "text-xs text-green-400 mt-4 font-mono font-bold";
-                    document.getElementById('mic-btn').classList.remove('mic-active');
-                    genBtn.disabled = false;
-                };
-
-                mediaRec.start();
-                recStatus.innerText = "RECORDING...";
-                document.getElementById('mic-btn').classList.add('mic-active');
-                genBtn.disabled = true; // Prevent generating empty file
-                
-            } catch(err) {
-                console.error(err);
-                alert("Mic Access Denied. Check browser settings.");
-            }
-        }
-
-        function stopRec(e) {
-            if(e) e.preventDefault();
-            if (mediaRec && mediaRec.state !== 'inactive') {
-                mediaRec.stop();
-            }
-        }
-
-    // --- (Keep the rest of your Design Studio JS here) ---
-    // ... (setType, Modal Logic, etc.) ...
-    // Paste the rest of the JS from the previous "Final Layout Fix" response here
-    function setType(t) {
+        function setType(t) {
             document.getElementById('type-input').value = t;
             ['text','file','audio'].forEach(x => {
                 document.getElementById('section-'+x).classList.add('hidden');
@@ -273,11 +184,56 @@
             });
             document.getElementById('section-'+t).classList.remove('hidden');
             document.getElementById('tab-'+t).classList.add('active');
-    }
-    // ... (include the rest of the sticker/drag logic) ...
-    // To ensure you have the full file, see the block below for the Sticker Logic:
-    
-    const canvas = document.getElementById('canvas');
+        }
+
+        // --- AUDIO RECORDER LOGIC (TOGGLE STYLE) ---
+        let mediaRec, chunks = [];
+        let isRecording = false;
+        
+        async function toggleRec() {
+            if (isRecording) {
+                // STOP RECORDING
+                mediaRec.stop();
+            } else {
+                // START RECORDING
+                if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+                    alert("MIC ERROR: Browser requires HTTPS security."); return;
+                }
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRec = new MediaRecorder(stream);
+                    chunks = [];
+                    
+                    mediaRec.ondataavailable = e => { if(e.data.size > 0) chunks.push(e.data); };
+                    
+                    mediaRec.onstart = () => {
+                        isRecording = true;
+                        document.getElementById('mic-btn').classList.add('mic-active');
+                        document.getElementById('mic-icon').classList.remove('fa-microphone');
+                        document.getElementById('mic-icon').classList.add('fa-stop');
+                        document.getElementById('rec-status').innerText = "RECORDING... TAP TO STOP";
+                        document.getElementById('rec-status').classList.add('text-red-500');
+                    }
+
+                    mediaRec.onstop = () => {
+                        isRecording = false;
+                        const f = new File([new Blob(chunks, {type:'audio/webm'})], "voice_note.webm", {type:'audio/webm'});
+                        const dt = new DataTransfer(); dt.items.add(f);
+                        document.getElementById('audio-file').files = dt.files;
+                        
+                        document.getElementById('mic-btn').classList.remove('mic-active');
+                        document.getElementById('mic-icon').classList.add('fa-microphone');
+                        document.getElementById('mic-icon').classList.remove('fa-stop');
+                        document.getElementById('rec-status').innerText = "AUDIO READY TO SEND ✅";
+                        document.getElementById('rec-status').className = "text-xs text-green-400 mt-4 font-mono font-bold";
+                    };
+
+                    mediaRec.start();
+                } catch(e) { alert("Mic Permission Denied."); }
+            }
+        }
+
+        const canvas = document.getElementById('canvas');
         let selectedEl = null; let stickerCount = 0; let bgImageSrc = null;
 
         function openModal() {

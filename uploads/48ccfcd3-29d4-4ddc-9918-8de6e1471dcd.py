@@ -4,16 +4,13 @@ import uuid
 import json
 from flask import Flask, render_template, request, send_file, url_for
 import qrcode
-from qrcode.image.styledpil import StyledPilImage
-from qrcode.image.styles.colormasks import SolidFillColorMask
-from qrcode.image.styles.moduledrawers import RoundedModuleDrawer
 from PIL import Image, ImageEnhance
 from io import BytesIO
 import base64
 import requests
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', 'codemania_voice_v8')
+app.secret_key = os.environ.get('SECRET_KEY', 'codemania_ultimate_fix')
 
 # --- CONFIGURATION ---
 UPLOAD_FOLDER = 'uploads'
@@ -51,7 +48,7 @@ def generate():
     unique_id = str(uuid.uuid4())
     stored_data = ""
 
-    # --- CONTENT HANDLING ---
+    # --- CONTENT HANDLING (Text & File Only) ---
     if data_type == 'text':
         stored_data = request.form.get('text_content')
         
@@ -64,14 +61,6 @@ def generate():
                 file.save(filepath)
                 stored_data = filepath
 
-    elif data_type == 'audio':
-        if 'audio_blob' in request.files:
-            file = request.files['audio_blob']
-            # Save as .webm (Browser standard)
-            filepath = os.path.join(UPLOAD_FOLDER, f"{unique_id}.webm")
-            file.save(filepath)
-            stored_data = filepath
-
     entry = {
         'id': unique_id,
         'type': data_type,
@@ -83,36 +72,48 @@ def generate():
     }
     save_entry(unique_id, entry)
 
-    # --- QR GENERATION ---
+    # --- ROBUST QR GENERATION ---
+    # 1. Generate Standard Black on White QR (Safest Method)
     link = url_for('scan_qr', unique_id=unique_id, _external=True)
     qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_H, box_size=10, border=2)
     qr.add_data(link)
     qr.make(fit=True)
     
+    # Create basic RGBA image
     qr_img = qr.make_image().convert("RGBA")
     
-    # Pixel Coloring
+    # 2. Pixel Coloring (Manual & Safe)
     datas = qr_img.getdata()
     new_data = []
+    
+    # Get User Color (Foreground)
     h = qr_color_hex.lstrip('#')
     user_rgb = tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
     
+    # Check if we actually have a background image
     has_custom_bg = False
     if background_data:
         try:
             bg_test = json.loads(background_data)
-            if bg_test and 'src' in bg_test and bg_test['src']: has_custom_bg = True
+            if bg_test and 'src' in bg_test and bg_test['src']:
+                has_custom_bg = True
         except: pass
 
     for item in datas:
+        # item[0] is Red channel. Low value = Black (Data), High value = White (Background)
         if item[0] < 128: 
+            # It's a dark pixel (Data) -> Apply User Color
             new_data.append((user_rgb[0], user_rgb[1], user_rgb[2], 255))
         else:
-            new_data.append((255, 255, 255, 0) if has_custom_bg else (255, 255, 255, 255))
+            # It's a white pixel (Background)
+            if has_custom_bg:
+                new_data.append((255, 255, 255, 0)) # Make Transparent so BG shows through
+            else:
+                new_data.append((255, 255, 255, 255)) # Keep Solid White
 
     qr_img.putdata(new_data)
     
-    # Compositing
+    # 3. Canvas Compositing
     qr_w, qr_h = qr_img.size
     final_img = qr_img
 
@@ -121,6 +122,7 @@ def generate():
             bg_data = json.loads(background_data)
             bg_src = bg_data['src']
             bg_img = None
+            
             if bg_src.startswith('data:image'):
                 head, data = bg_src.split(',', 1)
                 bg_img = Image.open(BytesIO(base64.b64decode(data))).convert("RGBA")
@@ -129,14 +131,20 @@ def generate():
                 bg_img = Image.open(BytesIO(resp.content)).convert("RGBA")
             
             if bg_img:
+                # Resize BG to match QR
                 bg_img = bg_img.resize((qr_w, qr_h), Image.Resampling.LANCZOS)
+                # Create Canvas
                 canvas = Image.new("RGBA", (qr_w, qr_h), (255, 255, 255, 255))
+                # Paste Custom BG
                 canvas.paste(bg_img, (0,0), bg_img)
+                # Paste QR Data on top
                 canvas.paste(qr_img, (0,0), qr_img)
                 final_img = canvas
-        except Exception as e: print(f"BG Error: {e}")
+        except Exception as e:
+            print(f"BG Error: {e}")
+            final_img = qr_img # Fallback
 
-    # Stickers
+    # 4. Apply Stickers
     if stickers_json:
         try:
             stickers = json.loads(stickers_json)
@@ -153,11 +161,13 @@ def generate():
                     if s_img:
                         target_size = int(qr_w * float(s['size']))
                         s_img = s_img.resize((target_size, target_size), Image.Resampling.LANCZOS)
+                        
                         opacity = float(s.get('opacity', 1.0))
                         if opacity < 1.0:
                             alpha = s_img.split()[3]
                             alpha = ImageEnhance.Brightness(alpha).enhance(opacity)
                             s_img.putalpha(alpha)
+
                         x = int(float(s['x']) * qr_w) - (target_size // 2)
                         y = int(float(s['y']) * qr_h) - (target_size // 2)
                         final_img.paste(s_img, (x, y), s_img)
@@ -194,8 +204,8 @@ def serve_content(unique_id, entry):
         save_entry(unique_id, entry)
         return render_template('view_text.html', content=entry['data'], unique_id=unique_id)
     
-    # File/Audio Download
-    elif entry['type'] in ['file', 'audio']:
+    # File Download
+    elif entry['type'] == 'file':
         return render_template('view_text.html', 
                                content="Secure Content Ready.", 
                                is_file=True, 
@@ -208,7 +218,7 @@ def download_file(unique_id):
     if entry:
         entry['current_scans'] += 1
         save_entry(unique_id, entry)
-        filename = "voice_note.webm" if entry['type'] == 'audio' else os.path.basename(entry['data'])
+        filename = os.path.basename(entry['data'])
         return send_file(entry['data'], as_attachment=True, download_name=filename)
     return "Error"
 
