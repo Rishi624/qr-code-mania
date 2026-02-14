@@ -1,8 +1,9 @@
 import os
 import time
-import uuid
+import secrets
+import string
 import json
-from flask import Flask, render_template, request, send_file, url_for
+from flask import Flask, render_template, request, send_file, url_for, flash, redirect
 import qrcode
 from qrcode.image.styledpil import StyledPilImage
 from qrcode.image.styles.colormasks import SolidFillColorMask
@@ -13,7 +14,7 @@ import base64
 import requests
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', 'codemania_voice_v8')
+app.secret_key = os.environ.get('SECRET_KEY', 'codemania_ultimate_v9')
 
 # --- CONFIGURATION ---
 UPLOAD_FOLDER = 'uploads'
@@ -22,6 +23,16 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(DATA_FOLDER, exist_ok=True)
 
 # --- HELPER FUNCTIONS ---
+def generate_short_id(length=6):
+    """Generates a short, readable ID (e.g., A7X92B)"""
+    alphabet = string.ascii_uppercase + string.digits
+    while True:
+        # Generate random ID
+        short_id = ''.join(secrets.choice(alphabet) for _ in range(length))
+        # Ensure it doesn't already exist
+        if not os.path.exists(os.path.join(DATA_FOLDER, f"{short_id}.json")):
+            return short_id
+
 def save_entry(unique_id, data):
     with open(os.path.join(DATA_FOLDER, f"{unique_id}.json"), 'w') as f:
         json.dump(data, f)
@@ -38,6 +49,23 @@ def load_entry(unique_id):
 def home():
     return render_template('index.html')
 
+# NEW: Route to handle entering an ID manually
+@app.route('/retrieve', methods=['POST'])
+def retrieve():
+    code = request.form.get('code')
+    if not code:
+        return redirect(url_for('home'))
+    
+    # Clean the code (remove spaces, uppercase)
+    code = code.strip().upper()
+    
+    # Check if exists
+    if load_entry(code):
+        return redirect(url_for('scan_qr', unique_id=code))
+    else:
+        # Pass an error flag to index (simplified for this structure)
+        return render_template('index.html', error="Invalid Code")
+
 @app.route('/generate', methods=['POST'])
 def generate():
     data_type = request.form.get('type')
@@ -48,26 +76,24 @@ def generate():
     stickers_json = request.form.get('stickers_data')
     background_data = request.form.get('background_data') 
     
-    unique_id = str(uuid.uuid4())
+    # GENERATE SHORT ID instead of UUID
+    unique_id = generate_short_id()
     stored_data = ""
 
-    # --- CONTENT HANDLING ---
     if data_type == 'text':
         stored_data = request.form.get('text_content')
-        
     elif data_type == 'file':
         if 'file_upload' in request.files:
             file = request.files['file_upload']
             if file.filename:
                 ext = os.path.splitext(file.filename)[1]
+                # Use short ID in filename
                 filepath = os.path.join(UPLOAD_FOLDER, f"{unique_id}{ext}")
                 file.save(filepath)
                 stored_data = filepath
-
     elif data_type == 'audio':
         if 'audio_blob' in request.files:
             file = request.files['audio_blob']
-            # Save as .webm (Browser standard)
             filepath = os.path.join(UPLOAD_FOLDER, f"{unique_id}.webm")
             file.save(filepath)
             stored_data = filepath
@@ -91,7 +117,7 @@ def generate():
     
     qr_img = qr.make_image().convert("RGBA")
     
-    # Pixel Coloring
+    # Pixel Coloring logic (Same as before)
     datas = qr_img.getdata()
     new_data = []
     h = qr_color_hex.lstrip('#')
@@ -112,7 +138,6 @@ def generate():
 
     qr_img.putdata(new_data)
     
-    # Compositing
     qr_w, qr_h = qr_img.size
     final_img = qr_img
 
@@ -127,16 +152,14 @@ def generate():
             elif bg_src.startswith('http'):
                 resp = requests.get(bg_src)
                 bg_img = Image.open(BytesIO(resp.content)).convert("RGBA")
-            
             if bg_img:
                 bg_img = bg_img.resize((qr_w, qr_h), Image.Resampling.LANCZOS)
                 canvas = Image.new("RGBA", (qr_w, qr_h), (255, 255, 255, 255))
                 canvas.paste(bg_img, (0,0), bg_img)
                 canvas.paste(qr_img, (0,0), qr_img)
                 final_img = canvas
-        except Exception as e: print(f"BG Error: {e}")
+        except: pass
 
-    # Stickers
     if stickers_json:
         try:
             stickers = json.loads(stickers_json)
@@ -149,7 +172,6 @@ def generate():
                     elif s['src'].startswith('http'):
                         resp = requests.get(s['src'])
                         s_img = Image.open(BytesIO(resp.content)).convert("RGBA")
-                    
                     if s_img:
                         target_size = int(qr_w * float(s['size']))
                         s_img = s_img.resize((target_size, target_size), Image.Resampling.LANCZOS)
@@ -168,12 +190,13 @@ def generate():
     final_img.save(buf, format="PNG")
     img_b64 = base64.b64encode(buf.getvalue()).decode('utf-8')
 
-    return render_template('result.html', qr_image=img_b64, link=link)
+    # Pass the unique_id (Code) to the template
+    return render_template('result.html', qr_image=img_b64, link=link, unique_id=unique_id)
 
 @app.route('/scan/<unique_id>', methods=['GET', 'POST'])
 def scan_qr(unique_id):
     entry = load_entry(unique_id)
-    if not entry: return render_template('error.html', message="Link Invalid")
+    if not entry: return render_template('error.html', message="Code Invalid")
     if time.time() > entry['expiry']: return render_template('error.html', message="Expired")
     if entry['current_scans'] >= entry['max_scans']: return render_template('error.html', message="Limit Reached")
 
@@ -188,16 +211,13 @@ def scan_qr(unique_id):
     return serve_content(unique_id, entry)
 
 def serve_content(unique_id, entry):
-    # Text View
     if entry['type'] == 'text':
         entry['current_scans'] += 1
         save_entry(unique_id, entry)
         return render_template('view_text.html', content=entry['data'], unique_id=unique_id)
-    
-    # File/Audio Download
     elif entry['type'] in ['file', 'audio']:
         return render_template('view_text.html', 
-                               content="Secure Content Ready.", 
+                               content="Data Ready.", 
                                is_file=True, 
                                file_url=url_for('download_file', unique_id=unique_id),
                                unique_id=unique_id)
